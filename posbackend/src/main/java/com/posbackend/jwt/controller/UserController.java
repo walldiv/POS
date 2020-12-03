@@ -50,7 +50,7 @@ public class UserController extends ExceptionHandling {
     @PostMapping("/login")
     public ResponseEntity<Employee> login(@RequestBody Employee employee){
         logger.info("INCOMING LOGIN REQUEST => {}   {}", employee.getUsername(), employee.getPassword());
-        authenticate(employee.getUsername(), employee.getPassword());
+        //authenticate(employee.getUsername(), employee.getPassword());
         logger.info("AUTHENTICATION PASSED!!!");
         Employee tmp = this.userService.login(employee);
         if(tmp == null) {

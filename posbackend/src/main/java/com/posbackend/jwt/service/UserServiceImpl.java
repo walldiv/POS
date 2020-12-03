@@ -79,7 +79,7 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
     @Override
     public Employee login(Employee employee) {
-        return empRepository.findByEmployeeCreds(employee.getEmail(), employee.getUsername());
+        return empRepository.findByEmployeeCreds(employee.getUsername(), employee.getPassword());
     }
 
     @Override
