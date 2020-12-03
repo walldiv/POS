@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 public class PosbackendApplication implements CommandLineRunner {
@@ -23,8 +25,12 @@ public class PosbackendApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		logger.info("EMPLOYEES -> {}", dao.findAll());
-		logger.info("EMPLOYEE => {}", dao.getEmployeeByLogin(thisEmp));
+//		logger.info("EMPLOYEES -> {}", dao.findAll());
+//		logger.info("EMPLOYEE => {}", dao.getEmployeeByLogin(thisEmp));
 	}
 
+	@Bean
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

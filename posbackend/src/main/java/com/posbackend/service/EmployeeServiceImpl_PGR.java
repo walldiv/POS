@@ -29,11 +29,6 @@ public class EmployeeServiceImpl_PGR implements IEmployeeService{
     }
 
     @Override
-    public Employee getEmployeeByLogin(Employee employee) {
-        return employeeDao.findByEmployeeEmail(employee.getEmail(), employee.getPassword());
-    }
-
-    @Override
     public boolean clockEmployeeIn(Employee employee, OffsetDateTime timeIn) {
         Timeclock timestamp = new Timeclock();
         timestamp.in(employee.getEmployeeid(), timeIn);

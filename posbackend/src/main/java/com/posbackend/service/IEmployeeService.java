@@ -10,9 +10,6 @@ public interface IEmployeeService {
     //getAllUsers
     public List<Employee> findAll();
 
-    //Get single employee by email/password - LOGIN METHOD
-    public Employee getEmployeeByLogin(Employee employee);
-
     //Clock in an employee
     public boolean clockEmployeeIn(Employee employee, OffsetDateTime timeIn);
 

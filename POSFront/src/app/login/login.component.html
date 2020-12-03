@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <form class="formBorder p-4" (ngSubmit)="onSubmitForm(f)" #f="ngForm">
+      <div class="form-group">
+        <label for="email" class="mr-2">EMAIL:</label>
+        <input type="text" name="email" ngModel required>
+      </div>
+      <div class="form-group">
+        <label for="password" class="mr-2">PASSWORD:</label>
+        <input type="password" name="password" ngModel required minlength="6">
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-success m-1" [disabled]="!f.valid">LOGIN</button>
+        <button type="button" class="btn btn-danger m-1" (click)="onClearForm(f)">CLEAR</button>
+      </div>
+    </form>
+  </div>
+</div>
