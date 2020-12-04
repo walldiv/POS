@@ -1,6 +1,7 @@
 package com.posbackend.jwt.service;
 
 import com.posbackend.jwt.exception.AlreadyExistsException;
+import com.posbackend.jwt.exception.LoginErrorException;
 import com.posbackend.jwt.model.UserPrincipal;
 import com.posbackend.model.Employee;
 import com.posbackend.repository.EmployeeRepository;
@@ -78,8 +79,13 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     }
 
     @Override
-    public Employee login(Employee employee) {
-        return empRepository.findByEmployeeCreds(employee.getUsername(), employee.getPassword());
+    public Employee login(Employee employee) throws LoginErrorException {
+        Employee tmp = empRepository.findByEmployeeCreds(employee.getUsername(), employee.getPassword());
+        if(tmp == null) {
+            throw new LoginErrorException("");
+        } else{
+            return tmp;
+        }
     }
 
     @Override
@@ -88,8 +94,15 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     }
 
     @Override
-    public Employee findUserByUsername(String username) {
-        return null;
+    public Employee findUserByUsername(String username) throws UsernameNotFoundException {
+        Employee tmp = empRepository.findByUsername(username);
+        if(tmp == null) {
+            logger.error("NO USER FOUND BY USERNAME => {}", username);
+            throw new UsernameNotFoundException("NO USER FOUND BY USERNAME => " + username);
+        } else {
+            validateLoginAttempt(tmp);
+            return tmp;
+        }
     }
 
     @Override
@@ -104,26 +117,19 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        Employee tmp = empRepository.findByUsername(s);
-        if(tmp == null) {
-            logger.error("NO USER FOUND BY USERNAME => {}", s);
-            throw new UsernameNotFoundException("NO USER FOUND BY USERNAME => " + s);
-        } else {
-            validateLoginAttempt(tmp);
-            UserPrincipal userPrincipal = new UserPrincipal(tmp);
-            logger.info("FOUND USER BY USERNAME => {}", s);
-            return userPrincipal;
-        }
+        return null;
     }
 
     private void validateLoginAttempt(Employee employee) {
         if (employee.isNotLocked()){
             if(loginAttemptService.hasExceededMaxAttempts(employee.getUsername())) {
+                logger.error("TOO MANY LOGIN ATTEMPTS - ACCOUNT IS NOW LOCKED");
                 employee.setNotLocked(false);
             } else{
                 employee.setNotLocked(true);
             }
         } else{
+            logger.error("ACCOUNT IS LOCKED - UNABLE TO LOGIN");
             loginAttemptService.evictUserFromLoginAttemptCache(employee.getUsername());
         }
     }

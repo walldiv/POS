@@ -2,7 +2,9 @@ package com.posbackend.jwt.service;
 
 
 import com.posbackend.jwt.exception.AlreadyExistsException;
+import com.posbackend.jwt.exception.LoginErrorException;
 import com.posbackend.model.Employee;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,11 +12,11 @@ import java.util.List;
 public interface IUserService {
     Employee register(String firstName, String lastName, String username, String email) throws AlreadyExistsException;
 
-    Employee login(Employee employee);
+    Employee login(Employee employee) throws LoginErrorException;
 
     List<Employee> getUsers();
 
-    Employee findUserByUsername(String username);
+    Employee findUserByUsername(String username) throws UsernameNotFoundException;
 
     Employee findUserByEmail(String email);
 

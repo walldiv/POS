@@ -1,8 +1,10 @@
 package com.posbackend.jwt.controller;
 
+import com.posbackend.jwt.JWTAuthProvider;
 import com.posbackend.jwt.JWTTokenProvider;
 import com.posbackend.jwt.exception.AlreadyExistsException;
 import com.posbackend.jwt.exception.ExceptionHandling;
+import com.posbackend.jwt.exception.LoginErrorException;
 import com.posbackend.jwt.model.UserPrincipal;
 import com.posbackend.jwt.service.IUserService;
 import com.posbackend.model.Employee;
@@ -14,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.xml.ws.Response;
@@ -26,14 +30,20 @@ import static com.posbackend.jwt.config.SecurityConstants.JWT_TOKEN_HEADER;
 public class UserController extends ExceptionHandling {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private AuthenticationManager authenticationManager;
+    private JWTAuthProvider authProvider;
     private JWTTokenProvider jwtTokenProvider;
     private IUserService userService;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
 
     @Autowired
-    public UserController(AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider, IUserService userService) {
+    public UserController(AuthenticationManager authenticationManager, JWTAuthProvider authProvider, JWTTokenProvider jwtTokenProvider, IUserService userService,
+                          BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.authenticationManager = authenticationManager;
+        this.authProvider = authProvider;
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @GetMapping("/hello")
@@ -48,15 +58,16 @@ public class UserController extends ExceptionHandling {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Employee> login(@RequestBody Employee employee){
+    public ResponseEntity<Employee> login(@RequestBody Employee employee) throws LoginErrorException {
         logger.info("INCOMING LOGIN REQUEST => {}   {}", employee.getUsername(), employee.getPassword());
-        //authenticate(employee.getUsername(), employee.getPassword());
-        logger.info("AUTHENTICATION PASSED!!!");
-        Employee tmp = this.userService.login(employee);
-        if(tmp == null) {
+        String encodedPass = this.bCryptPasswordEncoder.encode(employee.getPassword());
+        Authentication auth = authenticate(employee.getUsername(), employee.getPassword());
+        Employee tmp = this.userService.findUserByUsername(employee.getUsername());
+        if(tmp == null || auth == null) {
             logger.error("ERROR LOGGING IN EMPLOYEE => {}", employee.getUsername());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
+            logger.info("AUTHENTICATION PASSED!!!    => {}", auth.getCredentials().toString());
             UserPrincipal userPrincipal = new UserPrincipal(tmp);
             HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
             return new ResponseEntity<>(tmp, jwtHeader, HttpStatus.OK);
@@ -69,7 +80,9 @@ public class UserController extends ExceptionHandling {
         return headers;
     }
 
-    private void authenticate(String email, String password) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+    private Authentication authenticate(String username, String password) {
+        //System.out.println("AuthenticationManager => " + authenticationManager.toString());
+        return authProvider.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        //return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 }

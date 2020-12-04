@@ -17,16 +17,9 @@ public class PosbackendApplication implements CommandLineRunner {
 	public static void main(String[] args) {SpringApplication.run(PosbackendApplication.class, args); }
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	@Autowired
-	EmployeeServiceImpl_PGR dao;
-
-	private Employee thisEmp = new Employee("walldiv@gmail.com", "1234");
-
 
 	@Override
 	public void run(String... args) throws Exception {
-//		logger.info("EMPLOYEES -> {}", dao.findAll());
-//		logger.info("EMPLOYEE => {}", dao.getEmployeeByLogin(thisEmp));
 	}
 
 	@Bean

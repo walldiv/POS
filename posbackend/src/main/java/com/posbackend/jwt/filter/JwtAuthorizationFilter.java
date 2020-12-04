@@ -47,6 +47,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.clearContext();
             }
         }
+        logger.info("JWTAUTHORIZATIONFILTER => FIRED!");
         filterChain.doFilter(request, response);
     }
 }
