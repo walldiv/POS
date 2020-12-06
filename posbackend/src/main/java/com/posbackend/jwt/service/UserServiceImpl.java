@@ -38,7 +38,6 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     private Logger logger = LoggerFactory.getLogger(getClass());
     private BCryptPasswordEncoder passwordEncoder;
     private EmployeeRepository empRepository;
-    private LoginAttemptService loginAttemptService;
 
     private static final String ALREADY_EXISTS = "The username or email already exists - please choose another";
 
@@ -47,7 +46,6 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
                            LoginAttemptService loginAttemptService) {
         this.passwordEncoder = passwordEncoder;
         this.empRepository = empRepository;
-        this.loginAttemptService = loginAttemptService;
     }
 
 
@@ -100,7 +98,6 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
             logger.error("NO USER FOUND BY USERNAME => {}", username);
             throw new UsernameNotFoundException("NO USER FOUND BY USERNAME => " + username);
         } else {
-            validateLoginAttempt(tmp);
             return tmp;
         }
     }
@@ -120,17 +117,4 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
         return null;
     }
 
-    private void validateLoginAttempt(Employee employee) {
-        if (employee.isNotLocked()){
-            if(loginAttemptService.hasExceededMaxAttempts(employee.getUsername())) {
-                logger.error("TOO MANY LOGIN ATTEMPTS - ACCOUNT IS NOW LOCKED");
-                employee.setNotLocked(false);
-            } else{
-                employee.setNotLocked(true);
-            }
-        } else{
-            logger.error("ACCOUNT IS LOCKED - UNABLE TO LOGIN");
-            loginAttemptService.evictUserFromLoginAttemptCache(employee.getUsername());
-        }
-    }
 }

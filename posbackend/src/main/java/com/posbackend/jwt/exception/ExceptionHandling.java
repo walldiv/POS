@@ -40,6 +40,11 @@ public class ExceptionHandling {
         return createHttpResponse(HttpStatus.UNAUTHORIZED, INCORRECT_CREDENTIALS);
     }
 
+    @ExceptionHandler(AccountLockedOutException.class)
+    public ResponseEntity<HttpResponse> accountLockedOutException(AccountLockedOutException exception) {
+        return createHttpResponse(HttpStatus.FORBIDDEN, ACCOUNT_LOCKED);
+    }
+
     private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String message) {
         HttpResponse response = new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(),
                 message.toUpperCase());

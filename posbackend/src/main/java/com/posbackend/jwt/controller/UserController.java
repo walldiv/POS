@@ -2,6 +2,7 @@ package com.posbackend.jwt.controller;
 
 import com.posbackend.jwt.JWTAuthProvider;
 import com.posbackend.jwt.JWTTokenProvider;
+import com.posbackend.jwt.exception.AccountLockedOutException;
 import com.posbackend.jwt.exception.AlreadyExistsException;
 import com.posbackend.jwt.exception.ExceptionHandling;
 import com.posbackend.jwt.exception.LoginErrorException;
@@ -58,15 +59,19 @@ public class UserController extends ExceptionHandling {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Employee> login(@RequestBody Employee employee) throws LoginErrorException {
+    public ResponseEntity<Employee> login(@RequestBody Employee employee) throws LoginErrorException, AccountLockedOutException {
         logger.info("INCOMING LOGIN REQUEST => {}   {}", employee.getUsername(), employee.getPassword());
         String encodedPass = this.bCryptPasswordEncoder.encode(employee.getPassword());
         Authentication auth = authenticate(employee.getUsername(), employee.getPassword());
+        if(auth == null) {
+            throw new AccountLockedOutException("blah");
+        }
         Employee tmp = this.userService.findUserByUsername(employee.getUsername());
-        if(tmp == null || auth == null) {
+        if(tmp == null) {
             logger.error("ERROR LOGGING IN EMPLOYEE => {}", employee.getUsername());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
+            throw new LoginErrorException("blah");
+        }
+         else {
             logger.info("AUTHENTICATION PASSED!!!    => {}", auth.getCredentials().toString());
             UserPrincipal userPrincipal = new UserPrincipal(tmp);
             HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
